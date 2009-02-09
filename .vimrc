@@ -1,10 +1,13 @@
   scriptencoding utf-8
 
+  " Change <Leader>
+  let mapleader = ","
+
 " Set temporary directory (don't litter local dir with swp/tmp files)
   set directory=/tmp/
 
-" Set grep to ack
-  set grepprg=ack\ --noenv\ -a
+" When scrolling off-screen do so 3 lines at a time, not 1
+  set scrolloff=3
 
 " These two enable syntax highlighting
   set nocompatible
@@ -18,7 +21,6 @@
 
 " Highlight matching parens
   set showmatch
-
   set completeopt=menu,preview
   
 " Use the tab complete menu
@@ -82,8 +84,14 @@
   :nmap ,tp :tabprevious<cr>  
   :nmap ,te :tabedit  
 
-" SHELL
+" Remap F1 from Help to ESC.  No more accidents
+  nmap <F1> <Esc>
+  map! <F1> <Esc>
 
+" <leader>f to startup an ack search
+  map <leader>f :Ack<space>
+
+" SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
 
   function! s:RunShellCommand(cmdline)
@@ -104,7 +112,6 @@
     1
   endfunction
 
-
   :nmap ,sh :Shell 
 
 " find file in project
@@ -124,7 +131,6 @@
   set statusline+=[
   set statusline+=%{strlen(&ft)?&ft:'none'}, " filetype
   set statusline+=%{&fileformat}] " file format
-
   set statusline+=%h%1*%m%r%w%0* " flag
   set statusline+=%= " right align
   set statusline+=%-14.(%l,%c%V%)\ %<%P " offset
@@ -155,15 +161,29 @@
   let NERDTreeHighlightCursorline = 1
   let NERDTreeShowBookmarks = 1
   let NERDTreeShowHidden = 1
-"  let NERDTreeQuitOnOpen = 1
 
   :nmap <F2> :NERDTreeToggle<cr>
+
+" NERDComment {{{
+  let NERDShutUp = 1
+  " bind command-/ to toggle comment
+  " requires NERD Commenter to be installed: http://www.vim.org/scripts/script.php?script_id=1218
+  nmap <D-/> ,c<space>
+  vmap <D-/> ,c<space>
+  imap <D-/> <C-O>,c<space>
 
   autocmd FileType irb inoremap <buffer> <silent> <Cr> <Esc>:<C-u>ruby v=VIM::Buffer.current;v.append(v.line_number, eval(v[v.line_number]).inspect)<Cr>
   nnoremap ,irb :<C-u>below new<Cr>:setfiletype irb<Cr>:set syntax=ruby<Cr>:set buftype=nofile<Cr>:set bufhidden=delete<Cr>i
 
   " Textmate Fuzzy Finder ignores
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**"
-  let g:fuzzy_matching_limit = 20
+  let g:fuzzy_matching_limit = 40
+
+
+  autocmd FileType ruby set omnifunc=rubycomplete#Complete
+  autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+  autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
 
   runtime user_settings.vim
