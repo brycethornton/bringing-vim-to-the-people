@@ -5,12 +5,6 @@ map <D-]> :tabnext<CR>
 imap <D-[> <C-O>:tabprevious<CR>
 imap <D-]> <C-O>:tabnext<CR>
 
-" Unmap Apple+T so we can...
-macmenu &File.New\ Tab key=<nop>
-
-" Change Apple+T to TextMate Like Fuzzy Finder
-nnoremap <D-t> :FuzzyFinderTextMate<CR> 
-
 " Unmap Apple+Shift+T so we can...
 macmenu &File.Open\ Tab\.\.\. key=<nop>
 
