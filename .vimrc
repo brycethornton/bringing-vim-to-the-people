@@ -1,5 +1,8 @@
   scriptencoding utf-8
 
+" Explicitly set 256 color support
+  set t_Co=256
+
 " Change <Leader>
   let mapleader = ","
 
@@ -59,13 +62,16 @@
   set number
   setlocal numberwidth=3
 
+  "folding settings
+  set foldmethod=indent   "fold based on indent
+  set foldnestmax=10      "deepest fold is 10 levels
+  set nofoldenable        "dont fold by default
+  set foldlevel=1         "this is just what i use
+
 " * File Browsing
 
 " Settings for explorer.vim
   let g:explHideFiles='^\.'
-
-" Settings fo rnetrw
-  let g:netrw_list_hide='^\.,\~$'
 
 " Enable the tab bar
   set showtabline=2 " 2=always
@@ -91,6 +97,10 @@
 
 " <leader>f to startup an ack search
   map <leader>f :Ack<Space>
+
+	set splitbelow " Open new split windows below current
+  
+  au FileType vim set ofu=syntaxcomplete#Complete
 
 " SHELL
   command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
@@ -118,8 +128,9 @@
 " Fuzzy find files in project a la TextMate
   nmap <leader>t :FuzzyFinderTextMate<CR> 
   let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;files/**;vendor/**;coverage/**;tmp/**"
-  let g:fuzzy_matching_limit = 40
+  let g:fuzzy_enumerating_limit = 20
   let g:fuzzy_path_display = 'relative_path'
+  let g:fuzzy_ceiling = 5000
 
 " Use FuzzyFinder to replace built-in tag navigation :tag and <C-]>:
   nnoremap <silent> <C-f><C-t> :FuzzyFinderTag!<CR>
@@ -158,17 +169,6 @@
 " Turn off rails bits of statusbar
   let g:rails_statusline=0
  
-" TagList {{{
-  let Tlist_GainFocus_On_ToggleOpen = 1
-  let Tlist_Process_File_Always = 1
-  let Tlist_Inc_Winwidth = 0
-  let Tlist_Enable_Fold_Column = 0 "Disable drawing the fold column
-  let Tlist_Use_SingleClick = 1 "Single click tag selection
-  let Tlist_Use_Right_Window = 1
-  let Tlist_Exit_OnlyWindow = 1 "Exit if only the taglist is open
-  let Tlist_File_Fold_Auto_Close = 1 " Only auto expand the current file
-  nmap <F3> :TlistToggle<CR>
-
 " NERDTree {{{
   let NERDChristmasTree = 1
   let NERDTreeHighlightCursorline = 1
@@ -178,6 +178,7 @@
 
 " NERDComment {{{
   let NERDShutUp = 1
+  let NERDDefaultNesting = 0
   " bind command-/ to toggle comment
   " requires NERD Commenter to be installed: http://www.vim.org/scripts/script.php?script_id=1218
   nmap <D-/> ,c<Space>
@@ -198,5 +199,37 @@
   autocmd FileType php set omnifunc=phpcomplete#CompletePHP
   autocmd FileType c set omnifunc=ccomplete#Complete
 
+  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+  function! ScreenRun(text)
+    if !exists("g:screen_sessionname") || !exists("g:screen_windowname")
+      call Screen_Vars()
+    end
+
+    echo system("screen -S " . g:screen_sessionname . " -p " . g:screen_windowname . " -X eval 'stuff \"" . substitute(a:text, "'", "'\\\\''", 'g') . "'\"")
+  endfunction
+
+  function! Screen_Session_Names(A,L,P)
+    return system("screen -ls | awk '/Attached/ {print $1}'")
+  endfunction
+
+  function! Screen_Vars()
+    if !exists("g:screen_sessionname") || !exists("g:screen_windowname")
+      let g:screen_sessionname = ""
+      let g:screen_windowname = "0"
+    end
+
+    let g:screen_sessionname = input("session name: ", "", "custom,Screen_Session_Names")
+    let g:screen_windowname = input("window name: ", g:screen_windowname)
+  endfunction
+  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  vmap <C-c><C-c> "ry :call ScreenRun(@r)<CR>
+  nmap <C-c><C-c> vip<C-c><C-c>
+  nmap <C-c>v :call Screen_Vars()<CR>
+
+" have some fun with bufexplorer
+  let g:bufExplorerDefaultHelp=0       " Do not show default help.
+  let g:bufExplorerShowRelativePath=1  " Show relative paths.
+  
 " load user settings
   runtime user_settings.vim
