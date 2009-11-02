@@ -285,11 +285,14 @@ if has("gui_running") || &t_Co == 88 || &t_Co == 256
 	call <SID>X("Todo", "999988", "", "underline")
 
 
-	call <SID>X("Cursor", "", "ffff33", "")
+	call <SID>X("Cursor", "", "000000", "")
 	call <SID>X("CursorLine", "", "ffffcc", "none")
 	call <SID>X("Directory", "4183c4", "", "")
-	call <SID>X("DiffAdd", "000000", "ddffdd", "")
-	call <SID>X("DiffDelete", "000000", "ffdddd", "")
+"	call <SID>X("DiffAdd", "2E2E2E", "9CF9B1", "")
+"	call <SID>X("DiffDelete", "2E2E2E", "FFA296", "")
+ highlight DiffAdded guifg=#2E2E2E guibg=#9CF9B1
+ highlight DiffRemoved guifg=#2E2E2E guibg=#FFA296
+	
 	call <SID>X("DiffText", "", "666666", "")
 	call <SID>X("ErrorMsg", "a61717", "e3d2d2", "bold")
 	call <SID>X("VertSplit", "666666", "eaeaea", "")
@@ -298,7 +301,7 @@ if has("gui_running") || &t_Co == 88 || &t_Co == 256
 	call <SID>X("Normal", "000000", "f8f8ff", "")
 	call <SID>X("StatusLine", "666666", "eaeaea", "")
 	call <SID>X("StatusLineNC", "eaeaea", "666666", "")
-	call <SID>X("Visual", "", "ffffcc", "")
+	call <SID>X("Visual", "", "ffff86", "")
 
 	" delete functions {{{
 	delf <SID>X

@@ -49,7 +49,9 @@ if has("gui_win32") && !exists("b:browsefilter")
 				\ "All Files (*.*)\t*.*\n"
 endif
 
-for ns in ['clojure.core', 'clojure.set', 'clojure.xml', 'clojure.zip']
+for ns in ['clojure.core', 'clojure.set', 'clojure.xml', 'clojure.zip',
+			\ 'clojure.walk', 'clojure.template', 'clojure.stacktrace',
+			\ 'clojure.inspector', 'clojure.test', 'clojure.test.tap']
 	call vimclojure#AddCompletions(ns)
 endfor
 
@@ -60,7 +62,7 @@ function! ClojureGetFoldingLevel(lineno)
 	function closure.f() dict
 		execute self.lineno
 
-		if vimclojure#SynIdName() =~ 'clojureParen\d' && vimclojure#Yank('l', 'normal "lyl') == '('
+		if vimclojure#SynIdName() =~ 'clojureParen\d' && vimclojure#Yank('l', 'normal! "lyl') == '('
 			return 1
 		endif
 
@@ -80,7 +82,9 @@ if exists("g:clj_want_folding") && g:clj_want_folding == 1 && 0 == 1
 	setlocal foldmethod=expr
 endif
 
-if exists("g:clj_want_gorilla") && g:clj_want_gorilla == 1
+call vimclojure#InitBuffer()
+
+if exists("b:vimclojure_namespace")
 	call vimclojure#MakePlug("n", "DocLookupWord", 'vimclojure#DocLookup(expand("<cword>"))')
 	call vimclojure#MakePlug("n", "DocLookupInteractive", 'vimclojure#DocLookup(input("Symbol to look up: "))')
 	call vimclojure#MakePlug("n", "JavadocLookupWord", 'vimclojure#JavadocLookup(expand("<cword>"))')
@@ -93,8 +97,32 @@ if exists("g:clj_want_gorilla") && g:clj_want_gorilla == 1
 	call vimclojure#MapPlug("n", "ji", "JavadocLookupInteractive")
 	call vimclojure#MapPlug("n", "fd", "FindDoc")
 
-	call vimclojure#MakePlug("n", "RequireFile", 'vimclojure#RequireFile()')
+	call vimclojure#MakePlug("n", "MetaLookupWord", 'vimclojure#MetaLookup(expand("<cword>"))')
+	call vimclojure#MakePlug("n", "MetaLookupInteractive", 'vimclojure#MetaLookup(input("Symbol to look up: "))')
+
+	call vimclojure#MapPlug("n", "mw", "MetaLookupWord")
+	call vimclojure#MapPlug("n", "mi", "MetaLookupInteractive")
+
+	call vimclojure#MakePlug("n", "SourceLookupWord", 'vimclojure#SourceLookup(expand("<cword>"))')
+	call vimclojure#MakePlug("n", "SourceLookupInteractive", 'vimclojure#SourceLookup(input("Symbol to look up: "))')
+
+	call vimclojure#MapPlug("n", "sw", "SourceLookupWord")
+	call vimclojure#MapPlug("n", "si", "SourceLookupInteractive")
+
+	call vimclojure#MakePlug("n", "GotoSourceWord", 'vimclojure#GotoSource(expand("<cword>"))')
+	call vimclojure#MakePlug("n", "GotoSourceInteractive", 'vimclojure#GotoSource(input("Symbol to go to: "))')
+
+	call vimclojure#MapPlug("n", "gw", "GotoSourceWord")
+	call vimclojure#MapPlug("n", "gi", "GotoSourceInteractive")
+
+	call vimclojure#MakePlug("n", "RequireFile", 'vimclojure#RequireFile(0)')
+	call vimclojure#MakePlug("n", "RequireFileAll", 'vimclojure#RequireFile(1)')
+
 	call vimclojure#MapPlug("n", "rf", "RequireFile")
+	call vimclojure#MapPlug("n", "rF", "RequireFileAll")
+
+	call vimclojure#MakePlug("n", "RunTests", 'vimclojure#RunTests(0)')
+	call vimclojure#MapPlug("n", "rt", "RunTests")
 
 	call vimclojure#MakePlug("n", "MacroExpand",  'vimclojure#MacroExpand(0)')
 	call vimclojure#MakePlug("n", "MacroExpand1", 'vimclojure#MacroExpand(1)')
@@ -121,15 +149,14 @@ if exists("g:clj_want_gorilla") && g:clj_want_gorilla == 1
 	inoremap <Plug>ClojureReplUpHistory <C-O>:call b:vimclojure_repl.upHistory()<CR>
 	inoremap <Plug>ClojureReplDownHistory <C-O>:call b:vimclojure_repl.downHistory()<CR>
 
-	nnoremap <Plug>ClojureClosePreview :pclose!<CR>
-	call vimclojure#MapPlug("n", "p", "ClosePreview")
+	nnoremap <Plug>ClojureCloseResultBuffer :call vimclojure#ResultBuffer.CloseBuffer()<CR>
+	call vimclojure#MapPlug("n", "p", "CloseResultBuffer")
 
 	setlocal omnifunc=vimclojure#OmniCompletion
 
-	" Get the namespace of the buffer.
-	let s:content = getbufline(bufnr("%"), 1, line("$"))
-	let b:vimclojure_namespace = vimclojure#ExecuteNailWithInput("NamespaceOfFile", s:content)
-	unlet s:content
+	augroup VimClojure
+		autocmd CursorMovedI <buffer> if pumvisible() == 0 | pclose | endif
+	augroup END
 endif
 
 let &cpo = s:cpo_save
