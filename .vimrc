@@ -112,3 +112,7 @@
   runtime! custom/nerdcommenter_config.vim
   runtime! custom/nerdtree_config.vim
   runtime! custom/fuzzy_finder_config.vim
+
+" load user settings
+  runtime user_settings.vim
+
